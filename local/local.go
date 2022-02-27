@@ -31,45 +31,28 @@ func NewLocal(listenHost, remoteHost string, localPort, remotePort int) (*SpLoca
 }
 
 // Listen 监听本地的连接请求，didListen：连接建立之后的回调
-func (l *SpLocal) Listen(didListen func(addr net.Addr)) error {
-	listener, err := net.ListenTCP("tcp", l.listen)
-	if err != nil {
-		return err
-	}
-	defer listener.Close()
-	if didListen != nil {
-		didListen(listener.Addr())
-	}
-	for {
-		conn, err := listener.AcceptTCP()
-		if err != nil {
-			log.Fatal(err)
-			continue
-		}
-		conn.SetLinger(0)
-		go l.handleConn(conn)
-	}
-	return nil
+func (l *SpLocal) Listen(didListen func(addr *net.TCPAddr)) error {
+	return MagicCylinderG.ListenEncryptedConn(l.listen, l.handleConn, didListen)
 }
 
-func (l *SpLocal) handleConn(conn *net.TCPConn) {
+func (l *SpLocal) handleConn(conn *MagicCylinderG.EncryptTcpConn) {
 	defer conn.Close()
-	remoteConn, err := net.DialTCP("tcp", nil, l.remote)
+	// 连接到服务端
+	remoteConn, err := MagicCylinderG.DialEncryptedConn(l.remote)
 	if err != nil {
-		log.Fatal(fmt.Sprintf("连接到远程服务器 %s 失败:%s", l.remote, err))
+		log.Println(fmt.Sprintf("连接到远程服务器 %s 失败:%s", l.remote, err))
 		return
 	}
 	defer remoteConn.Close()
-	remoteConn.SetLinger(0)
 
-	// 转发,将服务端的响应转发到本地
+	// 转发,将服务端的响应解密后转发到本地
 	go func() {
-		err := MagicCylinderG.Copy(conn, remoteConn)
+		err := remoteConn.DecoderCopy(conn)
 		if err != nil {
 			conn.Close()
 			remoteConn.Close()
 		}
 	}()
-	// 转发，将本机的请求转发到服务端
-	MagicCylinderG.Copy(remoteConn, conn)
+	// 转发，将本机的请求加密转发到服务端
+	remoteConn.EncoderCopy(conn)
 }
