@@ -15,12 +15,12 @@ func main() {
 	// 读取配置
 	conf.ReadConf()
 	// 创建本机端
-	spLocal, err := local.NewLocal(listenHost, conf.RemoteHost, conf.LocalPort, conf.RemotePort)
+	l, err := local.NewLocal(listenHost, conf.RemoteHost, conf.LocalPort, conf.RemotePort)
 	if err != nil {
 		log.Fatalln(err)
 	}
 	// 本机端监听请求
-	log.Fatalln(spLocal.Listen(func(addr *net.TCPAddr) {
+	log.Fatalln(l.Listen(func(addr *net.TCPAddr) {
 		log.Println(fmt.Sprintf(`
 local 启动成功：
 本地监听地址：

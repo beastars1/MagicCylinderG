@@ -8,14 +8,18 @@ import (
 	"strconv"
 )
 
-type SpLocal struct {
-	listen *net.TCPAddr
+// local
+// local指本机的监听地址，socks请求需要指定为该地址
+// remote指服务端地址，socks请求加密后发送过去进行代理
+type local struct {
+	local  *net.TCPAddr
 	remote *net.TCPAddr
 }
 
-func NewLocal(listenHost, remoteHost string, localPort, remotePort int) (*SpLocal, error) {
-	listenAddr := listenHost + ":" + strconv.Itoa(localPort)
-	listen, err := net.ResolveTCPAddr("tcp", listenAddr)
+func NewLocal(localHost, remoteHost string, localPort, remotePort int) (*local, error) {
+	// 本机监听地址
+	listenAddr := localHost + ":" + strconv.Itoa(localPort)
+	listener, err := net.ResolveTCPAddr("tcp", listenAddr)
 	if err != nil {
 		return nil, err
 	}
@@ -24,18 +28,19 @@ func NewLocal(listenHost, remoteHost string, localPort, remotePort int) (*SpLoca
 	if err != nil {
 		return nil, err
 	}
-	return &SpLocal{
-		listen: listen,
+	return &local{
+		local:  listener,
 		remote: remote,
 	}, nil
 }
 
 // Listen 监听本地的连接请求，didListen：连接建立之后的回调
-func (l *SpLocal) Listen(didListen func(addr *net.TCPAddr)) error {
-	return MagicCylinderG.ListenEncryptedConn(l.listen, l.handleConn, didListen)
+func (l *local) Listen(didListen func(addr *net.TCPAddr)) error {
+	return MagicCylinderG.ListenEncryptedConn(l.local, l.handleConn, didListen)
 }
 
-func (l *SpLocal) handleConn(conn *MagicCylinderG.EncryptTcpConn) {
+// 处理本机发起的socks请求，将其加密转发到服务端，并处理服务端的加密响应
+func (l *local) handleConn(conn *MagicCylinderG.EncryptTcpConn) {
 	defer conn.Close()
 	// 连接到服务端
 	remoteConn, err := MagicCylinderG.DialEncryptedConn(l.remote)
@@ -54,5 +59,5 @@ func (l *SpLocal) handleConn(conn *MagicCylinderG.EncryptTcpConn) {
 		}
 	}()
 	// 转发，将本机的请求加密转发到服务端
-	remoteConn.EncoderCopy(conn)
+	conn.EncoderCopy(remoteConn)
 }
