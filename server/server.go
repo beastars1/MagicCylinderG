@@ -70,6 +70,7 @@ func (s *server) handleEncryptedConn(conn *MagicCylinderG.EncryptTcpConn) {
 		ip = buf[4 : 4+net.IPv4len]
 	case 0x03:
 		// domain name
+		// string(buf[4])是 \r，往后才是域名
 		addr, err := net.ResolveIPAddr("ip", string(buf[5:n-2]))
 		if err != nil {
 			return
@@ -81,7 +82,7 @@ func (s *server) handleEncryptedConn(conn *MagicCylinderG.EncryptTcpConn) {
 	default:
 		return
 	}
-	port := buf[n-2:]
+	port := buf[n-2 : n]
 	// 目标主机的地址
 	addr := &net.TCPAddr{
 		IP:   ip,
