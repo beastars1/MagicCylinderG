@@ -13,6 +13,9 @@ const listenHost = "127.0.0.1"
 func main() {
 	conf := &cmd.Config{}
 	conf.ReadConf()
+	if conf == nil {
+		conf = cmd.DefaultConf()
+	}
 	s, err := server.NewServer(listenHost, conf.RemotePort)
 	if err != nil {
 		log.Fatalln(err)

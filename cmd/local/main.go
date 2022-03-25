@@ -14,6 +14,9 @@ func main() {
 	conf := &cmd.Config{}
 	// 读取配置
 	conf.ReadConf()
+	if conf == nil {
+		conf = cmd.DefaultConf()
+	}
 	// 创建本机端
 	l, err := local.NewLocal(listenHost, conf.RemoteHost, conf.LocalPort, conf.RemotePort)
 	if err != nil {

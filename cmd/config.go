@@ -26,3 +26,12 @@ func (conf *Config) ReadConf() {
 		}
 	}
 }
+
+// DefaultConf 如果没有配置文件，生成默认配置
+func DefaultConf() *Config {
+	return &Config{
+		LocalPort:  9999,
+		RemoteHost: "127.0.0.1",
+		RemotePort: 8888,
+	}
+}
