@@ -1,5 +1,7 @@
 {
   "localPort": 9999,
   "remoteHost": "127.0.0.1",
-  "remotePort": 8888
+  "remotePort": 8888,
+  "method": "none",
+  "auth": "2wYzDgXzAM/XvhRUNIr4P5LlRvXNbn0CrozAH2N0yxX9aXdbLnaEHe21T6jcbC25A6vhk714cCizJwzqgHlD6+me03OIoF/HQJh7Omj0XaEIWBMNcuhr0GqZSrbyo5G4C9EBt/GGEbFnyORJXrtXClOW1dkvbx7vj5RhGBqC3mAhzoklf/6/8EErONRmZd3/RdiVwcmsHOMJgcVtpVI+xKmL+6KDJJwmvOykTXxZMZAqTLQgFjlxPVywIxLfMIVa2sOXIuedSLLuLJvWdfYy5jw1yuI2wimqYpqORDc796e6rRevh/l6+gfgpksEGVZVjRAPfsYbQsxRn2RH0k78UA=="
 }

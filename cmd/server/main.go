@@ -13,10 +13,7 @@ const listenHost = "127.0.0.1"
 func main() {
 	conf := &cmd.Config{}
 	conf.ReadConf()
-	if conf == nil {
-		conf = cmd.DefaultConf()
-	}
-	s, err := server.NewServer(listenHost, conf.RemotePort)
+	s, err := server.NewServer(listenHost, conf)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -25,6 +22,8 @@ func main() {
 server 启动成功：
 本地监听地址：
 %s:%d
-`, listenHost, conf.LocalPort))
+加密方式：
+%s
+`, listenHost, conf.LocalPort, conf.Method))
 	})
 }

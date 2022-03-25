@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"golang.org/x/net/proxy"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"testing"
@@ -22,11 +21,11 @@ func TestSocks(t *testing.T) {
 	httpClient := &http.Client{Transport: httpTransport}
 	// set our socks5 as the dialer
 	httpTransport.Dial = dialer.Dial
-	if resp, err := httpClient.Get("https://www.baidu.com"); err != nil {
-		log.Fatalln(err)
+	if resp, err := httpClient.Get("https://www.qq.com"); err != nil {
+		t.Error(err)
 	} else {
 		defer resp.Body.Close()
 		body, _ := ioutil.ReadAll(resp.Body)
-		fmt.Printf("%s\n", body)
+		t.Logf("body:%s\n", body)
 	}
 }

@@ -14,11 +14,8 @@ func main() {
 	conf := &cmd.Config{}
 	// 读取配置
 	conf.ReadConf()
-	if conf == nil {
-		conf = cmd.DefaultConf()
-	}
 	// 创建本机端
-	l, err := local.NewLocal(listenHost, conf.RemoteHost, conf.LocalPort, conf.RemotePort)
+	l, err := local.NewLocal(listenHost, conf)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -30,6 +27,8 @@ local 启动成功：
 %s:%d
 远程服务地址：
 %s:%d
-`, listenHost, conf.LocalPort, conf.RemoteHost, conf.RemotePort))
+加密方式：
+%s
+`, listenHost, conf.LocalPort, conf.RemoteHost, conf.RemotePort, conf.Method))
 	}))
 }

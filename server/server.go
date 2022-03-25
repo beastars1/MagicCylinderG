@@ -2,6 +2,8 @@ package server
 
 import (
 	"MagicCylinderG"
+	"MagicCylinderG/cmd"
+	"MagicCylinderG/crypto"
 	"encoding/binary"
 	"net"
 	"strconv"
@@ -9,22 +11,28 @@ import (
 
 // server local指服务端监听客户端请求的地址，默认127.0.0.1
 type server struct {
-	local *net.TCPAddr
+	local  *net.TCPAddr
+	crypto crypto.Crypto
 }
 
-func NewServer(localHost string, localPort int) (*server, error) {
+func NewServer(localHost string, conf *cmd.Config) (*server, error) {
+	// 接收conf，生成crypto
+	c := crypto.CreateCrypto(conf)
 	// 服务端监听地址
-	listenAddr := localHost + ":" + strconv.Itoa(localPort)
+	listenAddr := localHost + ":" + strconv.Itoa(conf.RemotePort)
 	listener, err := net.ResolveTCPAddr("tcp", listenAddr)
 	if err != nil {
 		return nil, err
 	}
-	return &server{local: listener}, err
+	return &server{
+		local:  listener,
+		crypto: c,
+	}, err
 }
 
 // Listen  对监听的请求进行加密解密处理
 func (s *server) Listen(didListen func(addr *net.TCPAddr)) error {
-	return MagicCylinderG.ListenEncryptedConn(s.local, s.handleEncryptedConn, didListen)
+	return MagicCylinderG.ListenEncryptedConn(s.local, s.crypto, s.handleEncryptedConn, didListen)
 }
 
 // 处理服务端接收到的客户端的加密socks请求，进行socks握手，和客户端进行socks连接，之连接成功之后客户端就通过socks发送请求
@@ -115,5 +123,8 @@ func (s *server) handleEncryptedConn(conn *MagicCylinderG.EncryptTcpConn) {
 	}()
 
 	// 从目标服务器响应的数据加密发送到客户端
-	(&MagicCylinderG.EncryptTcpConn{ReadWriteCloser: dstConn}).EncoderCopy(conn)
+	(&MagicCylinderG.EncryptTcpConn{
+		ReadWriteCloser: dstConn,
+		Crypto:          conn.Crypto,
+	}).EncoderCopy(conn)
 }
