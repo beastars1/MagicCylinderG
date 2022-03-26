@@ -123,6 +123,7 @@ func ListenEncryptedConn(localAddr *net.TCPAddr, crypto crypto.Crypto, handleCon
 			log.Println(err)
 			continue
 		}
+		//log.Printf("accept conn, local:%s, remote:%s\n", localConn.LocalAddr(), localConn.RemoteAddr())
 		localConn.SetLinger(0)
 		go handleConn(&EncryptTcpConn{
 			ReadWriteCloser: localConn,
